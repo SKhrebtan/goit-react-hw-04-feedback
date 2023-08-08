@@ -1,63 +1,56 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Statistics from './Statistics';
 import Notification from './Notification'
 import FeedbackOptions from './FeedbackOptions'
 import Section from './Section'
 
-class App extends Component {
+function App () {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [positivePercentage, setPositivePercentage] = useState('');
 
-  static propTypes = {
-   good: PropTypes.number,
-    neutral: PropTypes.number,
-    bad: PropTypes.number,
-}
-
-   state = {
-  good: 0,
-  neutral: 0,
-  bad: 0
-  }
-  
-  
-
-    onButtonClick = e => {
-    const option = e.target.name;
-    if (option) {
-      this.setState(prevState => ({ [option]: prevState[option] + 1 }));
+  const onButtonClick = (type) => {
+      switch (type) {
+        case 'good':
+          setGood(good => good + 1);
+          break
+           case 'neutral':
+          setNeutral(neutral => neutral + 1);
+          break
+           case 'bad':
+          setBad(bad => bad + 1);
+          break
+        default:
+          console.log('щось не так')
     }
   };
 
-
-   
-
-    countTotalFeedback = (a,b,c) => {
-        return (a + b + c) ;
-       
+  useEffect(() => {
+    if (good === 0 && neutral === 0 && bad === 0) {
+      return
     }
+    setTotal(total => good + neutral + bad)
+    setPositivePercentage(positivePercentage => `${(good / total * 100)}%` )
+ },[good, neutral, bad, total])
 
-    countPositiveFeedbackPercentage = (total, positive) => {
-        return `${(positive / total * 100)}%`;
-        
-    }
-  render() {
-    const options = Object.keys(this.state);
-    const { good, neutral, bad } = this.state;
-     let totalAmount = this.countTotalFeedback(good, neutral, bad);     
-    let positivePercentage = this.countPositiveFeedbackPercentage(totalAmount, good);
+
+    
 
                return (
                    <div>
                    <Section title="Please leave feedback">
-                     <FeedbackOptions options={options} onLeaveFeedback={this.onButtonClick}/>
+                     <FeedbackOptions options={['good', 'neutral', 'bad']} onLeaveFeedback={onButtonClick}/>
                    </Section>
                    
                    <Section title="Statistics">
-                     {(totalAmount > 0) ?
+                     {(total > 0) ?
                        (<Statistics good={good}
                          neutral={neutral}
                          bad={bad}
-                         totalAmount={totalAmount}
+                         totalAmount={total}
                          positivePercentage={positivePercentage} />)
                      : (<Notification message="There is no feedback" />)} 
                    </Section>                                    
@@ -66,23 +59,11 @@ class App extends Component {
         )
        
   }
-}
 
 export default App;
 
-
-
-
-
-
-//  handleIncrement = () => {
-//         this.setState(prevState => ({good: prevState.good + 1}))
-//     }
-//    handleIncrementN = () => {
-//         this.setState(prevState => ({neutral: prevState.neutral + 1}))
-//     }
-//     handleIncrementB = () => {
-//         this.setState(prevState => ({bad: prevState.bad + 1}))
-//     }<button type="button" onClick={this.handleClickButton}>Good</button>
-//                 <button type="button" onClick={this.handleIncrementN}>Neutral</button>
-//                    <button type="button" onClick={this.handleIncrementB}>Bad</button>
+ App.propTypes = {
+   good: PropTypes.number,
+    neutral: PropTypes.number,
+    bad: PropTypes.number,
+}
